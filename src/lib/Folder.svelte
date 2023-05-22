@@ -1,4 +1,4 @@
-<svelte:options tag="Folder-Component"></svelte:options>
+<svelte:options tag="folder-component" />
 <script lang="ts">
   import { v4 as uuidv4 } from 'uuid';
   import { onMount } from 'svelte';
@@ -13,7 +13,8 @@
       id: uuidv4(),
       name: 'DefaultFolder',
       files: [],
-      level: 'root'
+      level: 'root',
+      type: 'folder'
     };
     folders.update(data =>{
       if(data && data.length === 0)
@@ -39,7 +40,8 @@
 function createFile(fileName){
   const newFile = {
     id: uuidv4(),
-    name: fileName
+    name: fileName,
+    type: 'file'
   };
   folders.update(data =>{
     const folder = findFolderById(data, $selectedFolder.id);
@@ -70,7 +72,8 @@ function createFile(fileName){
       id: uuidv4(),
       name: folderName,
       files: [],
-      level: parentFolder === null ? 'root' : parentFolder.level === 'root' ? 'first' : 'second'
+      level: parentFolder === null ? 'root' : parentFolder.level === 'root' ? 'first' : 'second',
+      type: 'folder'
     }
     folders.update(data =>{
       if (parentFolder === null) {
@@ -128,7 +131,9 @@ function createFile(fileName){
           <option value={folder}>{folder.name}</option>
           {#if folder.files}
             {#each folder.files as file}
+              {#if file.type === 'folder'}
               <option value={file}>{file.name}</option>
+              {/if}
             {/each}
           {/if}
           {/each}
@@ -192,28 +197,46 @@ function createFile(fileName){
   </div>
 </div>
 
-<style>
+<style lang="scss">
   .card{
     background-color: #b8c0d8;
-  }
-  input {
+    width: fit-content;
+    padding: 30px;
+    margin: auto;
+    margin-top: 50px;
+    vertical-align: middle;
+    input {
 		display: block;
 		width: 193px;
-    margin-bottom: 10px;
     height: 25px;
-	}
-
-  select {
+	  }
+    select {
 		display: block;
 		width: 200px;
-    margin-bottom: 10px;
     text-align: center;
     height: 30px;
-	}
-
-  #folders{
+	  }
+    #folders{
     text-align: left;
     padding: 20px 40px 20px 20px;
+    }
+    table{
+      td{
+        padding-bottom: 10px;
+      }
+    }
+    button{
+    display: block;
+    margin: auto;
+    width: 100px;
+    height: 30px;
+      &:hover{
+        background-color: #3e67d9;
+        color: black;
+        font-weight: bold;
+        cursor: pointer;
+      }
+    }
   }
 
 </style>
