@@ -9,11 +9,11 @@ export default defineConfig({
     compilerOptions: {
       customElement: true
     }
-  })],
-  build:{
-    lib:{
-      entry: 'src/main.ts',
-      name: 'folder-web-component'
-    }
-  }
+  })]
+  // build:{
+  //   lib:{
+  //     entry: 'src/main.ts',
+  //     name: 'folder-web-component'
+  //   }
+  // }
 })
