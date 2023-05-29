@@ -7,7 +7,8 @@ export default defineConfig({
   plugins: [svelte({
     preprocess: sveltePreprocess(),
     compilerOptions: {
-      customElement: true
+      customElement: true,
+      css: "injected"
     }
   })],
   build:{

@@ -3,6 +3,7 @@
   import { v4 as uuidv4 } from 'uuid';
   import { onMount } from 'svelte';
   import { selectedType, folders, selectedFolder, selectedLevel } from '../store.js';
+  export let is_user_authenticated;
   let name = "";
   let types = ["File", "Folder"];
   let showForm: boolean = true;
@@ -103,98 +104,102 @@ function createFile(fileName){
 </script>
 
 <div class="card">
-  {#if showForm}
-  <form>
-  <table>
-    <tr>
-      <td><label for="fileName">File/Folder Name:</label></td>
-      <td><input required placeholder = "Enter File/Folder Name" bind:value={name}/></td>
-    </tr>
-    <tr>
-      <td><label for="type">Type:</label></td>
-      <td>
-        <select bind:value={$selectedType} required>
-          {#each types as type}
-          <option value={type}>{type}</option>
-          {/each}
-        </select> 
-      </td>
-    </tr>
-    {#if $selectedType === "File"}
-    <tr>
-      <td>
-        <label for="folder">Select Folder:</label>
-      </td>
-      <td>
-        <select bind:value={$selectedFolder}>
-          {#each $folders as folder}
-          <option value={folder}>{folder.name}</option>
-          {#if folder.files}
-            {#each folder.files as file}
-              {#if file.type === 'folder'}
-              <option value={file}>{file.name}</option>
+  {#if is_user_authenticated}
+    {#if showForm}
+      <form>
+      <table>
+        <tr>
+          <td><label for="fileName">File/Folder Name:</label></td>
+          <td><input required placeholder = "Enter File/Folder Name" bind:value={name}/></td>
+        </tr>
+        <tr>
+          <td><label for="type">Type:</label></td>
+          <td>
+            <select bind:value={$selectedType} required>
+              {#each types as type}
+              <option value={type}>{type}</option>
+              {/each}
+            </select> 
+          </td>
+        </tr>
+        {#if $selectedType === "File"}
+        <tr>
+          <td>
+            <label for="folder">Select Folder:</label>
+          </td>
+          <td>
+            <select bind:value={$selectedFolder}>
+              {#each $folders as folder}
+              <option value={folder}>{folder.name}</option>
+              {#if folder.files}
+                {#each folder.files as file}
+                  {#if file.type === 'folder'}
+                  <option value={file}>{file.name}</option>
+                  {/if}
+                {/each}
               {/if}
-            {/each}
-          {/if}
-          {/each}
-        </select>
-      </td>
-    </tr>
+              {/each}
+            </select>
+          </td>
+        </tr>
+        {/if}
+        {#if $selectedType === "Folder"}
+        <tr>
+          <td>
+            <label for="folder">Select Level:</label>
+          </td>
+          <td>
+            <select bind:value={$selectedLevel}>
+              <option>At Root</option>
+              {#each $folders as folder}
+                <option value={folder}>{folder.name}</option>
+              {/each}
+            </select>
+          </td>
+        </tr>
+        {/if}
+        <tr>
+          <td>
+            <button on:click="{onSave}">Save</button>
+          </td>
+          <td>
+            <button on:click="{onCancel}">Cancel</button>
+          </td>
+        </tr>
+      </table>
+      </form>
     {/if}
-    {#if $selectedType === "Folder"}
-    <tr>
-      <td>
-        <label for="folder">Select Level:</label>
-      </td>
-      <td>
-        <select bind:value={$selectedLevel}>
-          <option>At Root</option>
-          {#each $folders as folder}
-            <option value={folder}>{folder.name}</option>
-          {/each}
-        </select>
-      </td>
-    </tr>
-    {/if}
-    <tr>
-      <td>
-        <button on:click="{onSave}">Save</button>
-      </td>
-      <td>
-        <button on:click="{onCancel}">Cancel</button>
-      </td>
-    </tr>
-  </table>
-  </form>
-  {/if}
-  <div id="showHierarchy">
-  {#if !showForm}
-    <button on:click={()=>{ reset(); showForm = true}}>Back</button>
-    <div id="folders">
-      <ul>
-        {#each $folders as folder}
-        <li>
-          <span>{folder.name}</span>
-        </li>
-        {#if folder.files}
+    <div id="showHierarchy">
+      {#if !showForm}
+        <button on:click={()=>{ reset(); showForm = true}}>Back</button>
+        <div id="folders">
           <ul>
-            {#each folder.files as item}
-              <li>{item.name}</li>
-              {#if item.files}
-                <ul>
-                  {#each item.files as file}
-                  <li>file</li>
-                  {/each}
-                </ul>
-              {/if}
+            {#each $folders as folder}
+            <li>
+              <span>{folder.name}</span>
+            </li>
+            {#if folder.files}
+              <ul>
+                {#each folder.files as item}
+                  <li>{item.name}</li>
+                  {#if item.files}
+                    <ul>
+                      {#each item.files as file}
+                      <li>file</li>
+                      {/each}
+                    </ul>
+                  {/if}
+                {/each}
+              </ul>
+            {/if}
             {/each}
           </ul>
-        {/if}
-        {/each}
-      </ul>
+        </div>
+      {/if}
     </div>
+  {:else}
+    <h1 class="error">User is not authenticated!</h1>
   {/if}
-  </div>
 </div>
 
 <style lang="scss">
@@ -236,6 +241,9 @@ function createFile(fileName){
         font-weight: bold;
         cursor: pointer;
       }
+    }
+    .error{
+      color: red;
     }
   }
 
