@@ -3,11 +3,11 @@
   import { v4 as uuidv4 } from 'uuid';
   import { onMount } from 'svelte';
   import { selectedType, folders, selectedFolder, selectedLevel } from '../store.js';
-  export let is_user_authenticated;
-  let name = "";
+  export let is_user_authenticated = true;
+  let name = '';
   let types = ["File", "Folder"];
   let showForm: boolean = true;
-  
+  let alreadyExistsErrorMsg = '';
   onMount(() => {
 		//creating default root folder
     const defaultRootFolder = {
@@ -45,7 +45,7 @@ function createFile(fileName){
     type: 'file'
   };
   folders.update(data =>{
-    const folder = findFolderById(data, $selectedFolder.id);
+    const folder = findFolderByName(data, $selectedFolder.name);
     if (folder) {
     folder.files.push(newFile);
     }
@@ -67,6 +67,20 @@ function createFile(fileName){
     return null;  
   }
 
+  function findFolderByName(data, name) {
+    for (const folder of data) {
+      if (folder.name === name) {
+        return folder;
+      } else if (folder.files?.length > 0) {
+        const foundFolder = findFolderByName(folder.files, name);
+        if (foundFolder) {
+          return foundFolder;
+        }
+      }
+    }
+    return null;  
+  }
+
 
   function createFolder(folderName, parentFolder){
     const newFolder = {
@@ -80,7 +94,7 @@ function createFile(fileName){
       if (parentFolder === null) {
       data.push(newFolder);
       } else {
-      const parent = findFolderById(data, parentFolder.id);
+      const parent = findFolderByName(data, parentFolder.name);
       if (parent) {
         parent.files.push(newFolder);
       }
@@ -101,6 +115,15 @@ function createFile(fileName){
     selectedLevel.set(null);
   }
   
+  function checkIfNameExists(){
+    const exisiting = findFolderByName($folders, name);
+    if(exisiting){
+      alreadyExistsErrorMsg = 'Name already exists';
+      name='';
+    }else{
+      alreadyExistsErrorMsg = '';
+    }
+  }
 </script>
 
 <div class="card">
@@ -111,7 +134,13 @@ function createFile(fileName){
       <table>
         <tr>
           <td><label for="fileName">File/Folder Name:</label></td>
-          <td><input required placeholder = "Enter File/Folder Name" bind:value={name}/></td>
+          <td><input required placeholder = "Enter File/Folder Name" bind:value={name}
+            on:blur={()=> checkIfNameExists()}/>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><span class="errorMsg">{alreadyExistsErrorMsg}</span></td>
         </tr>
         <tr>
           <td><label for="type">Type:</label></td>
@@ -161,10 +190,10 @@ function createFile(fileName){
         {/if}
         <tr>
           <td>
-            <button on:click="{onSave}">Save</button>
+            <button on:click="{onCancel}">Cancel</button>
           </td>
           <td>
-            <button on:click="{onCancel}">Cancel</button>
+            <button on:click="{onSave}" disabled={alreadyExistsErrorMsg !== ''}>Save</button>
           </td>
         </tr>
       </table>
@@ -225,6 +254,10 @@ function createFile(fileName){
 		width: 193px;
     height: 25px;
 	  }
+    .errorMsg{
+      color: red;
+      font-size: 12px;
+    }
     select {
 		display: block;
 		width: 200px;
@@ -247,9 +280,13 @@ function createFile(fileName){
     height: 30px;
       &:hover{
         background-color: #3e67d9;
-        color: black;
         font-weight: bold;
         cursor: pointer;
+      }
+      &:disabled{
+        cursor: default;
+        background-color: grey;
+        font-weight: bold;
       }
     }
     .error{
