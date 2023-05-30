@@ -106,6 +106,7 @@ function createFile(fileName){
 <div class="card">
   {#if is_user_authenticated}
     {#if showForm}
+      <h1>Folder Form</h1>
       <form>
       <table>
         <tr>
@@ -171,7 +172,7 @@ function createFile(fileName){
     {/if}
     <div id="showHierarchy">
       {#if !showForm}
-        <button on:click={()=>{ reset(); showForm = true}}>Back</button>
+        <h1>Folder Hierarchy</h1>
         <div id="folders">
           <ul>
             {#each $folders as folder}
@@ -195,6 +196,7 @@ function createFile(fileName){
             {/each}
           </ul>
         </div>
+        <button on:click={()=>{ reset(); showForm = true}}>Back</button>
       {/if}
     </div>
   {:else}
@@ -210,6 +212,14 @@ function createFile(fileName){
     margin: auto;
     margin-top: 50px;
     vertical-align: middle;
+    h1{
+      margin:0px;
+      margin-bottom: 20px;
+      text-align:center;
+      font-size: 3.2em;
+      line-height: 1.1;
+      font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    }
     input {
 		display: block;
 		width: 193px;
